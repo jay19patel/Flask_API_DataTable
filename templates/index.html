@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataTable </title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+    <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css" />
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css"
+        rel="stylesheet">
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/js/bootstrap-editable.js"></script>
+
+</head>
+
+<body>
+    <h1> My HTML File </h1>
+
+    <form action="javascript:void(0)">
+        <input type="text" placeholder="Name" id="a_name">
+        <input type="text" placeholder="Age" id="a_age">
+        <button type="" onclick="CreateAPI()"> Submit</button>
+    </form>
+
+    <h1> My DATA </h1>
+    <section>
+        <div class="container">
+            <table id="example" class="display" style="width:100%">
+                <thead>
+                    <tr>
+                        <th id="txtname">Name</th>
+                        <th id="txtage">Age</th>
+                        <th id="txtid">ID</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </section>
+
+    <script>
+        
+        function DataTable() {
+            console.log("My all APIs")
+            var requestOptions = {
+                method: 'GET',
+                redirect: 'follow'
+            };
+
+            fetch("http://127.0.0.1:5000/read", requestOptions)
+                .then(response => response.json())
+                .then(result => {
+                    console.log(result.Data)
+                    $(document).ready(function () {
+                        var table = $('#example').DataTable({
+                            "data": result.Data,
+                            "columns": [
+                                { data: "Name" },
+                                { data: "Age" },
+                                {
+                                    data: "Id",
+                                    "render": function (data) {
+                                        id = data
+                                        return "<button  value=" + data + " onclick=DeleteAPI(this) id=DeleteBtn >Delete</button><button  value=" + data + " onclick=UpdateAPI(this) class='update-btn'>Update</button>"
+                                    }
+                                },
+                            ],
+                        })
+                    });
+
+                    //  
+                })
+                .catch(error => console.log('error', error))
+        }
+
+        function UpdateAPI(e) {
+            let person = prompt("Enter Updated Name:", "");
+            let age = prompt("Enter Updated Age:", "");
+            console.log(person, age)
+
+
+            var requestOptions = {
+                method: 'POST',
+                redirect: 'follow',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({"Name":person,"Age":age,"ID":e.value})
+            };
+
+            fetch("http://127.0.0.1:5000/update/"+e.value, requestOptions)
+                .then(response => response.json())
+                .then(result => console.log(result))
+                .catch(error => console.log('error', error));
+
+                location.reload()
+
+        }
+
+        function DeleteAPI(e) {
+            console.log("delete id ", e.value)
+            var requestOptions = {
+                method: 'POST',
+                redirect: 'follow'
+                
+            };
+
+            fetch("http://127.0.0.1:5000/delete/" + e.value, requestOptions)
+                .then(response => response.json())
+                // .then(result => alert(result.Message))
+                .catch(error => console.log('error', error));
+            location.reload()
+        }
+
+
+        function CreateAPI() {
+            console.log("ONLINE")
+            const name = document.getElementById('a_name').value;
+            const age = document.getElementById('a_age').value;
+
+            const data = {
+                "Name": name,
+                "Age": age
+            }
+
+
+            var requestOptions = {
+                method: 'POST',
+                redirect: 'follow',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            };
+
+            fetch("http://127.0.0.1:5000/create", requestOptions)
+                .then(response => response.json())
+                .then(result => console.log(result))
+                .catch(error => console.log('error', error));
+
+            document.getElementById('a_name').value = "";
+            document.getElementById('a_age').value = "";
+
+            // DataTable()
+            location.reload()
+        }
+
+
+
+        DataTable()
+
+
+
+
+
+
+
+
+    </script>
+</body>
+
+</html>
